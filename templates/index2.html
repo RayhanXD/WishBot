@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html><body>
+<button onclick="startRecording()">Start Recording</button>
+<button onclick="stopRecording()">Stop Recording</button>
+<div id="transcription"></div>
+
+<script>
+let mediaRecorder;
+let recordedChunks = [];
+
+function startRecording() {
+    // Discard any previous audio
+    recordedChunks = [];
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+
+        mediaRecorder.addEventListener('dataavailable', function(e) {
+            recordedChunks.push(e.data);
+        });
+    });
+}
+
+function stopRecording() {
+    mediaRecorder.addEventListener('stop', function() {
+        const audioBlob = new Blob(recordedChunks);
+        const formData = new FormData();
+        formData.append('file', audioBlob);
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        }).then(response => response.text())
+          .then(data => {
+              document.getElementById('transcription').textContent = data;
+          });
+    });
+
+    mediaRecorder.stop();
+}
+</script>
+
+</body>
+</html>
