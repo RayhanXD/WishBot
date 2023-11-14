@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 import requests
@@ -48,9 +48,8 @@ def upload():
         ],
         max_tokens=300,
     )
-
     # Return the assistant's reply
-    return chat_response.choices[0].message.content
+    return render_template('response.html', transcription=transcript["text"], chat_response=chat_response.choices[0].message.content)
 
 if __name__ == '__main__':
     app.run(port=8000)
