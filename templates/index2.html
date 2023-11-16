@@ -39,27 +39,29 @@
     }
 
     // Function to stop recording
+    // Function to stop recording
     function stopRecording() {
-        // Event listener for when recording stops
-        mediaRecorder.addEventListener('stop', function() {
-            // Create a new Blob object from recordedChunks
-            const audioBlob = new Blob(recordedChunks);
-            // Create a new FormData object and append the audioBlob as 'file'
-            const formData = new FormData();
-            formData.append('file', audioBlob);
-            // Send a POST request to '/upload' with the formData
-            fetch('/upload', {
-                method:'POST',
-                body: formData
-            }).then(response => response.text())
-            .then(data => {
-      // Display the transcription in the 'transcription' div
-      document.getElementById('output').innerHTML = data});
+    // Event listener for when recording stops
+    mediaRecorder.addEventListener('stop', function() {
+        // Create a new Blob object from recordedChunks
+        const audioBlob = new Blob(recordedChunks);
+        // Create a new FormData object and append the audioBlob as 'file'
+        const formData = new FormData();
+        formData.append('file', audioBlob);
+        // Send a POST request to '/upload' with the formData
+        fetch('/upload', {
+            method:'POST',
+            body: formData
+        }).then(response => response.text())
+        .then(data => {
+            const output = document.getElementById('output');
+            output.innerHTML += data; // Fixed typo here from 'utput' to 'output'
         });
+    });
 
-        // Stop the mediaRecorder
-        mediaRecorder.stop();
-    }
+    // Stop the mediaRecorder
+    mediaRecorder.stop();
+}
 </script>
 
 <div id="output"><p>User: </p></div>

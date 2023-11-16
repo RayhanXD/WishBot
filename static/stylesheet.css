@@ -3,3 +3,8 @@
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     color: white;
 }
+.intro {
+    color: white ;
+    text-decoration: wavy;
+    padding-top: 10px;
+}
