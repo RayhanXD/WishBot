@@ -1,10 +1,18 @@
 * {
-    background-color: grey;
+    background-color: #E9F1F7;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     color: white;
 }
-.intro {
-    color: white ;
+#recordButton {
+    background-color: #131B23;
+    color: #E9F1F7;
+} 
+#user {
+    color: #131B23;
+    padding-top: 20px;
+}
+#output {
+    color: #131B23 ;
     text-decoration: wavy;
     padding-top: 10px;
 }

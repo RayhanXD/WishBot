@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from flask_socketio import SocketIO, emit
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 import requests
@@ -12,6 +13,7 @@ api_key = os.getenv('OPENAI_API_KEY')
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/Users/rayhanmohammad/cursor-ai-project/UPLOAD_FOLDER'
+socketio = SocketIO(app)
 
 @app.route('/')
 def home():
@@ -47,9 +49,17 @@ def upload():
             }
         ],
         max_tokens=300,
+        stream=True
     )
-    # Return the assistant's reply
-    return render_template('response.html', transcription=transcript["text"], chat_response=chat_response.choices[0].message.content)
+    
+    socketio.emit('transcription', {'data': transcript['text']})
+
+    for chunk in chat_response:
+        if chunk.choices[0].delta.content is not None:
+            print(chunk.choices[0].delta.content)
+            socketio.emit('chat_response', {'data': chunk.choices[0].delta.content})
+
+    return '', 200
 
 if __name__ == '__main__':
-    app.run(port=8000)
+    socketio.run(app, port=8000)

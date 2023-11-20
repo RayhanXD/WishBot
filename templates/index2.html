@@ -1,24 +1,34 @@
 <!DOCTYPE html>
-<html><body>
+
+<html>
+    <body>
 
     <!-- Link to the CSS stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
 
-    <!-- Start and Stop recording buttons -->
-    <button id="startButton">Start Recording</button>
-    <button id="stopButton">Stop Recording</button>
+    <!-- Push-to-talk recording button -->
+    <button id="recordButton" onmousedown="startRecording();" onmouseup="stopRecording();">Push to Talk</button>
 
     <!-- Div to display the transcription -->
-
-<script class="buttons">
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+    <script>
     // Variables for mediaRecorder and recordedChunks
     let mediaRecorder;
     let recordedChunks = [];
 
-    // Event listener for the 'startButton' to start recording when clicked
-    document.getElementById('startButton').addEventListener('click', startRecording);
-    // Event listener for the 'stopButton' to stop recording when clicked
-    document.getElementById('stopButton').addEventListener('click', stopRecording);
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('transcription', function(msg) {
+        console.log('Received transcription: ', msg.data);
+        const output = document.getElementById('user');
+        output.innerHTML += msg.data;
+    });
+    // Create a WebSocket connection
+    socket.on('chat_response', function(msg) {
+        console.log('Received chat_response: ', msg.data);
+        const output = document.getElementById('output');
+        output.innerHTML += msg.data;
+    });
 
     // Function to start recording
     function startRecording() {
@@ -39,33 +49,38 @@
     }
 
     // Function to stop recording
-    // Function to stop recording
     function stopRecording() {
-    // Event listener for when recording stops
-    mediaRecorder.addEventListener('stop', function() {
-        // Create a new Blob object from recordedChunks
-        const audioBlob = new Blob(recordedChunks);
-        // Create a new FormData object and append the audioBlob as 'file'
-        const formData = new FormData();
-        formData.append('file', audioBlob);
-        // Send a POST request to '/upload' with the formData
-        fetch('/upload', {
-            method:'POST',
-            body: formData
-        }).then(response => response.text())
-        .then(data => {
-            const output = document.getElementById('output');
-            output.innerHTML += data; // Fixed typo here from 'utput' to 'output'
+        // Event listener for when recording stops
+        mediaRecorder.addEventListener('stop', function() {
+            // Create a new Blob object from recordedChunks
+            const audioBlob = new Blob(recordedChunks);
+            // Create a new FormData object and append the audioBlob as 'file'
+            const formData = new FormData();
+            formData.append('file', audioBlob);
+            // Send a POST request to '/upload' with the formData
+            fetch('/upload', {
+                method:'POST',
+                body: formData
+            }).then(response => response.text())
+            .then(data => {
+                const output = document.getElementById('output');
+                output.innerHTML += data; // Fixed typo here from 'utput' to 'output'
+            })
+            
         });
-    });
 
-    // Stop the mediaRecorder
-    mediaRecorder.stop();
-}
+        // Stop the mediaRecorder
+        mediaRecorder.stop();
+    }
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // Your other code here
+    });
 </script>
 
-<div id="output"><p>User: </p></div>
+<div id="user">User: </div>
+<div id="output">Chatbot: </div>
 
 
-</body>
+    </body>
 </html>
