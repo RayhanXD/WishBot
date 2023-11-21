@@ -18,16 +18,24 @@
 
     var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-    socket.on('transcription', function(msg) {
-        console.log('Received transcription: ', msg.data);
+    let delay = 0;
+    socket.on('transcript', function(msg) {
+        console.log('Received transcript: ', msg.data);
         const output = document.getElementById('user');
-        output.innerHTML += msg.data;
+        setTimeout(function() {
+            output.innerHTML += msg.data + " ";
+        }, delay);
+        delay += 50; // Increase delay for next word
     });
     // Create a WebSocket connection
+    let chatDelay = delay + 1000; // Add an additional delay to ensure transcript has finished printing
     socket.on('chat_response', function(msg) {
         console.log('Received chat_response: ', msg.data);
-        const output = document.getElementById('output');
-        output.innerHTML += msg.data;
+        setTimeout(function() {
+            const output = document.getElementById('output');
+            output.innerHTML += msg.data;
+        }, chatDelay);
+        chatDelay += 50; // Increase delay for next message
     });
 
     // Function to start recording
@@ -50,6 +58,8 @@
 
     // Function to stop recording
     function stopRecording() {
+        document.getElementById('user').innerHTML = 'User: ';
+        document.getElementById('output').innerHTML = 'Chatbot: ';
         // Event listener for when recording stops
         mediaRecorder.addEventListener('stop', function() {
             // Create a new Blob object from recordedChunks
