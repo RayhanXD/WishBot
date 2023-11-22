@@ -5,110 +5,107 @@
         * {
             background-color: #E9F1F7;
             font-family: Verdana, Geneva, Tahoma, sans-serif;
-            color: white;
+            color: #131B23;
         }
         #recordButton {
             background-color: #131B23;
             color: #E9F1F7;
         } 
-        #user {
+        .chat-exchange .user-text {
             color: #131B23;
             padding-top: 20px;
         }
-        #output {
+        .chat-exchange .chatbot-text {
             color: #131B23 ;
             text-decoration: wavy;
             padding-top: 10px;
         }
         </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">   
+
     <body>
 
-    <!-- Link to the CSS stylesheet -->
-
-    <!-- Push-to-talk recording button -->
     <button id="recordButton" onmousedown="startRecording();" onmouseup="stopRecording();">Push to Talk</button>
 
-    <!-- Div to display the transcription -->
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
     <script>
-    // Variables for mediaRecorder and recordedChunks
     let mediaRecorder;
     let recordedChunks = [];
 
     var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-    let delay = 0;
-    socket.on('transcript', function(msg) {
-        console.log('Received transcript: ', msg.data);
-        const output = document.getElementById('user');
-        setTimeout(function() {
-            output.innerHTML += msg.data + " ";
-        }, delay);
-        delay += 50; // Increase delay for next word
-    });
-    // Create a WebSocket connection
-    let chatDelay = delay + 1000; // Add an additional delay to ensure transcript has finished printing
-    socket.on('chat_response', function(msg) {
-        console.log('Received chat_response: ', msg.data);
-        setTimeout(function() {
-            const output = document.getElementById('output');
-            output.innerHTML += msg.data;
-        }, chatDelay);
-        chatDelay += 50; // Increase delay for next message
-    });
+    socket.on('user_text', function(msg) {
+        console.log('Received user_text: ', msg.data);
+        const chatExchanges = document.querySelectorAll('.chat-exchange');
+        const lastExchange = chatExchanges[chatExchanges.length - 1];
+        const output = lastExchange.querySelector('.user-text');
+        output.innerHTML += msg.data + " ";
+        });
+    
+    socket.on('chatbot_text', function(msg) {
+        console.log('Received chatbot_text: ', msg.data);
+        const chatExchanges = document.querySelectorAll('.chat-exchange');
+        const lastExchange = chatExchanges[chatExchanges.length - 1];
+        const output = lastExchange.querySelector('.chatbot-text');
+        output.innerHTML += msg.data;
+        });
 
-    // Function to start recording
+    function stopRecording() {
+        mediaRecorder.addEventListener('stop', function() {
+            const audioBlob = new Blob(recordedChunks);
+            const formData = new FormData();
+            formData.append('file', audioBlob);
+            fetch('/upload', {
+                method:'POST',
+                body: formData
+            })
+            .then(data => {
+                addPlaceholderDivs();
+            })
+        });
+        mediaRecorder.stop();
+    }
+    function addPlaceholderDivs() {
+        const chatWindow = document.getElementById('chat-window');
+        const chatExchanges = document.querySelectorAll('.chat-exchange');
+        const lastExchange = chatExchanges[chatExchanges.length - 1];
+        const newExchange = lastExchange.cloneNode(true);
+        newExchange.querySelector('.user-text').innerHTML = 'User: ';
+        newExchange.querySelector('.chatbot-text').innerHTML = 'Chatbot: ';
+        chatWindow.appendChild(newExchange);
+    }
+
+
     function startRecording() {
-        // Discard any previous audio
         recordedChunks = [];
 
-        // Get user media and start recording
         navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
             mediaRecorder = new MediaRecorder(stream);
             mediaRecorder.start();
 
-            // Event listener to push recorded data to recordedChunks
             mediaRecorder.addEventListener('dataavailable', function(e) {
                 recordedChunks.push(e.data);
             });
         });
     }
-
-    // Function to stop recording
-    function stopRecording() {
-        document.getElementById('user').innerHTML = 'User: ';
-        document.getElementById('output').innerHTML = 'Chatbot: ';
-        // Event listener for when recording stops
-        mediaRecorder.addEventListener('stop', function() {
-            // Create a new Blob object from recordedChunks
-            const audioBlob = new Blob(recordedChunks);
-            // Create a new FormData object and append the audioBlob as 'file'
-            const formData = new FormData();
-            formData.append('file', audioBlob);
-            // Send a POST request to '/upload' with the formData
-            fetch('/upload', {
-                method:'POST',
-                body: formData
-            }).then(response => response.text())
-            .then(data => {
-                const output = document.getElementById('output');
-                output.innerHTML += data; // Fixed typo here from 'utput' to 'output'
-            })
-            
-        });
-
-        // Stop the mediaRecorder
-        mediaRecorder.stop();
-    }
-
-    document.addEventListener('DOMContentLoaded', (event) => {
-        // Your other code here
-    });
 </script>
 
-<div id="user">User: </div>
-<div id="output">Chatbot: </div>
+
+<div id="chat-window">
+    <div class="chat-exchange">
+        <div class="user-section">
+            <i class="fas fa-user"></i>
+            <div class="user-text">User: </div>
+        </div>
+        <div class="chatbot-section">
+            <i class="fas fa-robot"></i>
+            <div class="chatbot-text">Chatbot: </div>
+        </div>
+    </div>
+</div>
+
 
 
     </body>

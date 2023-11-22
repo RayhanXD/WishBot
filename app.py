@@ -52,16 +52,12 @@ def upload():
         stream=True
     )
     
-    transcript_list = transcript['text'].split()
-
-    for word in transcript_list:
-        print(word)
-        socketio.emit('transcript', {'data': word})
+    socketio.emit('user_text', {'data': transcript['text']})
 
     for chunk in chat_response:
         if chunk.choices[0].delta.content is not None:
             print(chunk.choices[0].delta.content)
-            socketio.emit('chat_response', {'data': chunk.choices[0].delta.content})
+            socketio.emit('chatbot_text', {'data': chunk.choices[0].delta.content})
 
     return '', 200
 
