@@ -1,10 +1,29 @@
 <!DOCTYPE html>
 
 <html>
+        <style>
+        * {
+            background-color: #E9F1F7;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            color: white;
+        }
+        #recordButton {
+            background-color: #131B23;
+            color: #E9F1F7;
+        } 
+        #user {
+            color: #131B23;
+            padding-top: 20px;
+        }
+        #output {
+            color: #131B23 ;
+            text-decoration: wavy;
+            padding-top: 10px;
+        }
+        </style>
     <body>
 
     <!-- Link to the CSS stylesheet -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
 
     <!-- Push-to-talk recording button -->
     <button id="recordButton" onmousedown="startRecording();" onmouseup="stopRecording();">Push to Talk</button>
