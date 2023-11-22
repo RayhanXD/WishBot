@@ -17,7 +17,7 @@ socketio = SocketIO(app)
 
 @app.route('/')
 def home():
-    return render_template('index2.html') #reads HTML file from templates folder
+    return render_template('index3.html') #reads HTML file from templates folder
 
 @app.route('/upload', methods=['POST'])
 def upload():

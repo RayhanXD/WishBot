@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat Interface</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/forms"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  .chat-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .message {
+    background-color: #f3f4f6;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    display: block; /* Changed from flex to block to stack messages */
+  }
+  .user-message {
+    text-align: left;
+  }
+  .chatbot-message {
+    text-align: left;
+  }
+  .message-icon {
+    font-size: 24px;
+    margin-right: 8px; /* Changed from margin-left to margin-right to move the icons to the left of the messages */
+    float: left; /* Added to move the icons to the left of the messages */
+  }
+  .recording-indicator {
+    height: 20px;
+    width: 20px;
+    background-color: red;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+  }
+  .microphone-icon {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+</style>
+</head>
+<body class="bg-white text-gray-800">
+<div class="chat-container p-4">
+  <div id="chatOutput" class="space-y-2">
+    <!-- Chat messages will be appended here -->
+  </div>
+  <div class="pt-4 flex justify-center items-center">
+    <button id="recordButton" class="microphone-icon bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
+      <span class="material-icons">mic</span>
+    </button>
+    <div id="recordingIndicator" class="recording-indicator"></div>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+<script>
+  let mediaRecorder;
+  let recordedChunks = [];
+
+  var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+  socket.on('user_text', function(msg) {
+      console.log('Received user_text: ', msg.data);
+      const chatExchanges = document.querySelectorAll('.chat-exchange');
+      const lastExchange = chatExchanges[chatExchanges.length - 1];
+      const output = lastExchange.querySelector('.user-text');
+      output.innerHTML += msg.data + " ";
+  });
+  
+  socket.on('chatbot_text', function(msg) {
+      console.log('Received chatbot_text: ', msg.data);
+      const chatExchanges = document.querySelectorAll('.chat-exchange');
+      const lastExchange = chatExchanges[chatExchanges.length - 1];
+      const output = lastExchange.querySelector('.chatbot-text');
+      output.innerHTML += msg.data;
+  });
+
+  const recordButton = document.getElementById('recordButton');
+  const recordingIndicator = document.getElementById('recordingIndicator');
+  const chatOutput = document.getElementById('chatOutput');
+
+  recordButton.addEventListener('mousedown', startRecording);
+  recordButton.addEventListener('mouseup', stopRecording);
+
+  function startRecording() {
+    recordedChunks = [];
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+
+        mediaRecorder.addEventListener('dataavailable', function(e) {
+            recordedChunks.push(e.data);
+        });
+    });
+  }
+  function stopRecording() {
+    addPlaceholderDivs();
+    mediaRecorder.addEventListener('stop', function() {
+        const audioBlob = new Blob(recordedChunks);
+        const formData = new FormData();
+        formData.append('file', audioBlob);
+        fetch('/upload', {
+            method:'POST',
+            body: formData
+        })
+        .then(data => {
+            //addPlaceholderDivs();
+        })
+    });
+    mediaRecorder.stop();
+  }
+
+  function addPlaceholderDivs() {
+    const chatOutput = document.getElementById('chatOutput');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message chat-exchange';
+    const userDiv = document.createElement('div');
+    userDiv.className = 'user-text';
+    userDiv.textContent = 'User: ';
+    const userIcon = document.createElement('span');
+    userIcon.className = 'material-icons message-icon';
+    userIcon.textContent = 'account_circle';
+    userDiv.appendChild(userIcon);
+    messageDiv.appendChild(userDiv);
+    const chatbotDiv = document.createElement('div');
+    chatbotDiv.className = 'chatbot-text';
+    chatbotDiv.textContent = 'Chatbot: ';
+    const chatbotIcon = document.createElement('span');
+    chatbotIcon.className = 'material-icons message-icon';
+    chatbotIcon.textContent = 'chat';
+    chatbotDiv.appendChild(chatbotIcon);
+    messageDiv.appendChild(chatbotDiv);
+    chatOutput.appendChild(messageDiv);
+  }
+</script>
+</body>
+</html>
