@@ -9,55 +9,87 @@ body {
     max-width: 700px;
     margin: 0 auto;
   }
-  .user-text {
+.user-text {
     color: #E7DFC6;
     text-align: left;
     background-color: #131B23;
     padding: 10px;
     margin: 10px 0;
     border-radius: 8px;
-    display: block; /* Changed from flex to block to stack messages */
+    display: block;
   }
-  .chatbot-text {
+.chatbot-text {
     color: #E7DFC6;
     text-align: left;
     background-color: #131B23;
     padding: 10px;
     margin: 10px 0;
     border-radius: 8px;
-    display: block; /* Changed from flex to block to stack messages */
+    display: block;
   }
-  .message-icon {
+.message-icon {
     font-size: 24px;
-    margin-right: 8px; /* Changed from margin-left to margin-right to move the icons to the left of the messages */
-    float: left; /* Added to move the icons to the left of the messages */
+    margin-right: 8px;
+    float: left;
   }
-  .microphone-icon.recording {
-    box-shadow: 0 0 0 1.5px red;
-  }
-  .microphone-icon {
-    position: relative;
-    color: #E7DFC6;
-    background-color: #131B23;
-    margin-right: 2px;
-  }
-  .microphone-icon:hover {
-    background-color: #2C3E50;
-  }
-  .remove-button {
-    color: #E7DFC6;
-    background-color: #131B23;
-    margin-left: 2px;
-  }
-  .remove-button:hover {
-    background-color: #2C3E50;
-  }
-  .button-container {
+.button-container {
+    width: 700px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     position: fixed;
     bottom: 2%;
     left: 50%;
+    border-radius: 10px;
     transform: translateX(-50%);
+    background-color: #131B23;
+}
+.microphone-icon.recording > span {
+    color: red;
+}
+.microphone-icon {
+    position: relative;
+    color: #E7DFC6;
+    background-color: #131B23;
+    width: 50%;
+    float: left;
+}
+.microphone-icon:hover > span {
+    color: #8B0000;
+}
+.microphone-icon.recording:hover > span {
+    color: red;
+}
+.microphone-icon:hover .record-text {
+    color: #2C3E50;
+}
+.remove-button {
+    position: relative;
+    color: #E7DFC6;
+    background-color: #131B23;
+    width: 50%;
+    float: right;
   }
-  
+.remove-button:hover > span {
+    color: green;
+  }
+.remove-button > span {
+    position: absolute;
+    right: 16px;
+  }
+.record-text {
+    position: absolute;
+    left: 55%;
+    transform: translateX(-50%);
+    width: 80%;
+    text-align: center;
+}
+.remove-text {
+    position: absolute;
+    right: 55%;
+    transform: translateX(50%);
+    width: 80%;
+    text-align: center;
+}
+.remove-button:hover .remove-text {
+    color: #2C3E50;
+}

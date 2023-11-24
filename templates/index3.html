@@ -14,16 +14,17 @@
   <div id="chatOutput" class="space-y-2">
     <!-- Chat messages will be appended here -->
   </div>
-  <div class="button-container">
-    <button id="recordButton" class="microphone-icon py-2 px-4 rounded inline-flex items-center">
-      <span class="material-icons">mic</span>
-    </button>
-    <button id="removeButton" class="remove-button py-2 px-4 rounded inline-flex items-center">
-      <span class="material-icons">refresh</span>
-    </button>
-  </div>
 </div>
-
+<div class="button-container">
+  <button id="recordButton" class="microphone-icon py-2 px-4 rounded inline-flex">
+    <span class="material-icons">mic</span>
+    <div class="record-text">Press button to start recording</div>
+  </button>
+  <button id="removeButton" class="remove-button py-2 px-4 rounded inline-flex">
+    <span class="material-icons">refresh</span>
+    <div class="remove-text">Press button to refresh session</div>
+  </button>
+</div>
 <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 <script>
   let mediaRecorder;
@@ -67,6 +68,7 @@
   removeButton.addEventListener('click', removeAllDivs);
   function startRecording() {
     recordedChunks = [];
+    addUserDiv();
 
     navigator.mediaDevices.getUserMedia({ audio: true })
     .then(stream => {
@@ -78,7 +80,7 @@
     });
   }
   function stopRecording() {
-    addPlaceholderDivs();
+    addChatbotDiv();
     mediaRecorder.addEventListener('stop', function() {
         const audioBlob = new Blob(recordedChunks);
         const formData = new FormData();
@@ -94,7 +96,7 @@
     mediaRecorder.stop();
   }
 
-  function addPlaceholderDivs() {
+  function addUserDiv() {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message chat-exchange';
 
@@ -107,6 +109,14 @@
     userDiv.appendChild(userIcon);
     messageDiv.appendChild(userDiv);
 
+    chatOutput.appendChild(messageDiv);
+    chatOutput.scrollTop = chatOutput.scrollHeight; // Added to scroll down to the latest message
+  }
+
+  function addChatbotDiv() {
+    const chatExchanges = document.querySelectorAll('.chat-exchange');
+    const lastExchange = chatExchanges[chatExchanges.length - 1];
+
     const chatbotDiv = document.createElement('div');
     chatbotDiv.className = 'chatbot-text';
     chatbotDiv.textContent = 'Chatbot: ';
@@ -114,11 +124,11 @@
     chatbotIcon.className = 'material-icons message-icon';
     chatbotIcon.textContent = 'chat';
     chatbotDiv.appendChild(chatbotIcon);
-    messageDiv.appendChild(chatbotDiv);
+    lastExchange.appendChild(chatbotDiv);
 
-    chatOutput.appendChild(messageDiv);
     chatOutput.scrollTop = chatOutput.scrollHeight; // Added to scroll down to the latest message
   }
+
   function removeAllDivs() {
     const messageDivs = document.querySelectorAll('.message');
     messageDivs.forEach(div => div.remove());
