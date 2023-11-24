@@ -1,0 +1,63 @@
+@import url('http://fonts.googleapis.com/css?family=Manrope');
+* {
+    font-family: Manrope;
+}
+body {
+    background-color: #F1F0EA;
+}
+.chat-container {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .user-text {
+    color: #E7DFC6;
+    text-align: left;
+    background-color: #131B23;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    display: block; /* Changed from flex to block to stack messages */
+  }
+  .chatbot-text {
+    color: #E7DFC6;
+    text-align: left;
+    background-color: #131B23;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    display: block; /* Changed from flex to block to stack messages */
+  }
+  .message-icon {
+    font-size: 24px;
+    margin-right: 8px; /* Changed from margin-left to margin-right to move the icons to the left of the messages */
+    float: left; /* Added to move the icons to the left of the messages */
+  }
+  .microphone-icon.recording {
+    box-shadow: 0 0 0 1.5px red;
+  }
+  .microphone-icon {
+    position: relative;
+    color: #E7DFC6;
+    background-color: #131B23;
+    margin-right: 2px;
+  }
+  .microphone-icon:hover {
+    background-color: #2C3E50;
+  }
+  .remove-button {
+    color: #E7DFC6;
+    background-color: #131B23;
+    margin-left: 2px;
+  }
+  .remove-button:hover {
+    background-color: #2C3E50;
+  }
+  .button-container {
+    display: flex;
+    justify-content: space-around;
+    position: fixed;
+    bottom: 2%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  

@@ -7,58 +7,20 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/forms"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<style>
-  .chat-container {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  .message {
-    background-color: #f3f4f6;
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 8px;
-    display: block; /* Changed from flex to block to stack messages */
-  }
-  .user-message {
-    text-align: left;
-  }
-  .chatbot-message {
-    text-align: left;
-  }
-  .message-icon {
-    font-size: 24px;
-    margin-right: 8px; /* Changed from margin-left to margin-right to move the icons to the left of the messages */
-    float: left; /* Added to move the icons to the left of the messages */
-  }
-  .recording-indicator {
-    height: 20px;
-    width: 20px;
-    background-color: red;
-    border-radius: 50%;
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: none;
-  }
-  .microphone-icon {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-</style>
+<link href="{{ url_for('static', filename='stylesheet.css') }}" rel="stylesheet">
 </head>
-<body class="bg-white text-gray-800">
+<body>
 <div class="chat-container p-4">
   <div id="chatOutput" class="space-y-2">
     <!-- Chat messages will be appended here -->
   </div>
-  <div class="pt-4 flex justify-center items-center">
-    <button id="recordButton" class="microphone-icon bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center">
+  <div class="button-container">
+    <button id="recordButton" class="microphone-icon py-2 px-4 rounded inline-flex items-center">
       <span class="material-icons">mic</span>
     </button>
-    <div id="recordingIndicator" class="recording-indicator"></div>
+    <button id="removeButton" class="remove-button py-2 px-4 rounded inline-flex items-center">
+      <span class="material-icons">refresh</span>
+    </button>
   </div>
 </div>
 
@@ -70,28 +32,39 @@
   var socket = io.connect('http://' + document.domain + ':' + location.port);
 
   socket.on('user_text', function(msg) {
-      console.log('Received user_text: ', msg.data);
-      const chatExchanges = document.querySelectorAll('.chat-exchange');
-      const lastExchange = chatExchanges[chatExchanges.length - 1];
-      const output = lastExchange.querySelector('.user-text');
-      output.innerHTML += msg.data + " ";
+        console.log('Received user_text: ', msg.data);
+        const chatExchanges = document.querySelectorAll('.chat-exchange');
+        const lastExchange = chatExchanges[chatExchanges.length - 1];
+        const output = lastExchange.querySelector('.user-text');
+        output.innerHTML += msg.data + " ";
+        chatOutput.scrollTop = chatOutput.scrollHeight; // Added to scroll down to the latest message
   });
   
   socket.on('chatbot_text', function(msg) {
-      console.log('Received chatbot_text: ', msg.data);
-      const chatExchanges = document.querySelectorAll('.chat-exchange');
-      const lastExchange = chatExchanges[chatExchanges.length - 1];
-      const output = lastExchange.querySelector('.chatbot-text');
-      output.innerHTML += msg.data;
+        console.log('Received chatbot_text: ', msg.data);
+        const chatExchanges = document.querySelectorAll('.chat-exchange');
+        const lastExchange = chatExchanges[chatExchanges.length - 1];
+        const output = lastExchange.querySelector('.chatbot-text');
+        output.innerHTML += msg.data;
+        chatOutput.scrollTop = chatOutput.scrollHeight; // Added to scroll down to the latest message
+
   });
 
   const recordButton = document.getElementById('recordButton');
-  const recordingIndicator = document.getElementById('recordingIndicator');
   const chatOutput = document.getElementById('chatOutput');
+  const removeButton = document.getElementById('removeButton');
 
-  recordButton.addEventListener('mousedown', startRecording);
-  recordButton.addEventListener('mouseup', stopRecording);
-
+  // Added event listener to the recordButton to start/stop recording when clicked
+  recordButton.addEventListener('click', function() {
+    if(mediaRecorder && mediaRecorder.state == 'recording') {
+      stopRecording();
+      recordButton.classList.remove('recording');
+    } else {
+      startRecording();
+      recordButton.classList.add('recording');
+    }
+  });
+  removeButton.addEventListener('click', removeAllDivs);
   function startRecording() {
     recordedChunks = [];
 
@@ -99,7 +72,6 @@
     .then(stream => {
         mediaRecorder = new MediaRecorder(stream);
         mediaRecorder.start();
-
         mediaRecorder.addEventListener('dataavailable', function(e) {
             recordedChunks.push(e.data);
         });
@@ -123,9 +95,9 @@
   }
 
   function addPlaceholderDivs() {
-    const chatOutput = document.getElementById('chatOutput');
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message chat-exchange';
+
     const userDiv = document.createElement('div');
     userDiv.className = 'user-text';
     userDiv.textContent = 'User: ';
@@ -134,6 +106,7 @@
     userIcon.textContent = 'account_circle';
     userDiv.appendChild(userIcon);
     messageDiv.appendChild(userDiv);
+
     const chatbotDiv = document.createElement('div');
     chatbotDiv.className = 'chatbot-text';
     chatbotDiv.textContent = 'Chatbot: ';
@@ -142,7 +115,13 @@
     chatbotIcon.textContent = 'chat';
     chatbotDiv.appendChild(chatbotIcon);
     messageDiv.appendChild(chatbotDiv);
+
     chatOutput.appendChild(messageDiv);
+    chatOutput.scrollTop = chatOutput.scrollHeight; // Added to scroll down to the latest message
+  }
+  function removeAllDivs() {
+    const messageDivs = document.querySelectorAll('.message');
+    messageDivs.forEach(div => div.remove());
   }
 </script>
 </body>
