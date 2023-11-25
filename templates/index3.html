@@ -25,6 +25,24 @@
     <div class="remove-text">Press button to refresh session</div>
   </button>
 </div>
+
+<div class="svg-container">
+<svg id="svgText">
+  <symbol id="s-text">
+    <text text-anchor="middle" x="50%" y="50%">Your wish</text>
+    <text text-anchor="middle" x="50%" y="90%">is my command</text>
+</symbol>
+
+  <g class = "g-ants">
+    <use xlink:href="#s-text" class="text-copy"></use>
+    <use xlink:href="#s-text" class="text-copy"></use>
+    <use xlink:href="#s-text" class="text-copy"></use>
+    <use xlink:href="#s-text" class="text-copy"></use>
+    <use xlink:href="#s-text" class="text-copy"></use>
+  </g>
+</svg>
+</div>
+
 <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 <script>
   let mediaRecorder;
@@ -55,17 +73,29 @@
   const chatOutput = document.getElementById('chatOutput');
   const removeButton = document.getElementById('removeButton');
 
+  var svgText = document.getElementById('svgText');
+
   // Added event listener to the recordButton to start/stop recording when clicked
   recordButton.addEventListener('click', function() {
+
     if(mediaRecorder && mediaRecorder.state == 'recording') {
-      stopRecording();
-      recordButton.classList.remove('recording');
+    stopRecording();
+    recordButton.classList.remove('recording');
     } else {
-      startRecording();
-      recordButton.classList.add('recording');
-    }
+    startRecording();
+    recordButton.classList.add('recording');
+  }
+  svgText.classList.remove('high-opacity');
+  svgText.classList.add('low-opacity');
   });
-  removeButton.addEventListener('click', removeAllDivs);
+
+  removeButton.addEventListener('click', function()
+  {
+    removeAllDivs();
+    svgText.classList.remove('low-opacity');
+    svgText.classList.add('high-opacity');
+});
+  
   function startRecording() {
     recordedChunks = [];
     addUserDiv();
@@ -133,6 +163,9 @@
     const messageDivs = document.querySelectorAll('.message');
     messageDivs.forEach(div => div.remove());
   }
+  setTimeout(() => {
+  chatOutput.scrollTop = chatOutput.scrollHeight;
+}, 0);
 </script>
 </body>
 </html>
