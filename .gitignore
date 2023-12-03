@@ -136,3 +136,10 @@ cython_debug/
 
 # audio file
 audio.webm
+
+*.pyc
+__pycache__/
+.venv/
+venv/
+ENV/
+env/
