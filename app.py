@@ -4,12 +4,15 @@ from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 import requests
 from openai import OpenAI
+from groq import Groq
 import os
 
-client = OpenAI()
+client = Groq(
+    api_key=os.environ.get("groq_api_key"),
+)
 
 load_dotenv()
-api_key = os.getenv('OPENAI_API_KEY')
+api_key_open = os.getenv('OPENAI_API_KEY')
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/Users/rayhanmohammad/cursor-ai-project/UPLOAD_FOLDER'
@@ -28,16 +31,13 @@ def upload():
     with open('audio.webm', 'rb') as f:
         response = requests.post(
             "https://api.openai.com/v1/audio/transcriptions",
-            headers={"Authorization": f"Bearer {api_key}"},
+            headers={"Authorization": f"Bearer {api_key_open}"},
             files={"file": f},
             data={"model": "whisper-1"}
         )
     transcript = response.json()
-    print(transcript["text"])
 
-    # Send the transcribed text to the ChatCompletion API
     chat_response = client.chat.completions.create(
-        model="gpt-4",
         messages=[
             {
                 "role": "system",
@@ -48,15 +48,16 @@ def upload():
                 "content": transcript["text"]
             }
         ],
+        model="mixtral-8x7b-32768",
         max_tokens=300,
-        stream=True
+        stream=True,
     )
     
     socketio.emit('user_text', {'data': transcript['text']})
 
     for chunk in chat_response:
         if chunk.choices[0].delta.content is not None:
-            print(chunk.choices[0].delta.content)
+            print(chunk.choices[0].delta.content, end="")
             socketio.emit('chatbot_text', {'data': chunk.choices[0].delta.content})
 
     return '', 200
