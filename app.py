@@ -61,4 +61,4 @@ def upload():
     return '', 200
 
 if __name__ == '__main__':
-    socketio.run(app, port=8000, allow_unsafe_werkzeug=True)
+    socketio.run(app, port=8000)
