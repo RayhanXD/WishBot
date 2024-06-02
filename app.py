@@ -16,6 +16,10 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/Users/rayhanmohammad/cursor-ai-project/UPLOAD_FOLDER'
 socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True)
 
+chat_history = [
+    {"role": "system", "content": "You are a helpful assistant."}
+]
+
 @app.route('/')
 def home():
     return render_template('index3.html') #reads HTML file from templates folder
@@ -35,17 +39,15 @@ def upload():
         )
     transcript = response.json()
 
+    user_message = {
+        "role": "user",
+        "content": transcript["text"]
+    }
+
+    chat_history.append(user_message)
+
     chat_response = client.chat.completions.create(
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a helpful assistant."
-            },
-            {
-                "role": "user",
-                "content": transcript["text"]
-            }
-        ],
+        messages=chat_history,
         model="mixtral-8x7b-32768",
         max_tokens=300,
         stream=True,
@@ -57,6 +59,11 @@ def upload():
         if chunk.choices[0].delta.content is not None:
             print(chunk.choices[0].delta.content, end="")
             socketio.emit('chatbot_text', {'data': chunk.choices[0].delta.content})
+            assistant_message = {
+                "role": "assistant",
+                "content": chunk.choices[0].delta.content
+            }
+            chat_history.append(assistant_message)
 
     return '', 200
 

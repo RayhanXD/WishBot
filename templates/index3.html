@@ -48,7 +48,7 @@
   let mediaRecorder;
   let recordedChunks = [];
 
-  var socket = io.connect('https://' + document.domain + ':' + location.port, {
+  var socket = io.connect('http://' + document.domain + ':' + location.port, {
      reconnection: true,
      reconnectionDelay: 1000,
      reconnectionDelayMax: 5000,
