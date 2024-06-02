@@ -48,7 +48,12 @@
   let mediaRecorder;
   let recordedChunks = [];
 
-  var socket = io.connect('http://' + document.domain + ':' + location.port);
+  var socket = io.connect('http://' + document.domain + ':' + location.port, {
+     reconnection: true,
+     reconnectionDelay: 1000,
+     reconnectionDelayMax: 5000,
+     reconnectionAttempts: Infinity
+  });
 
   socket.on('user_text', function(msg) {
         console.log('Received user_text: ', msg.data);
