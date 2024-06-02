@@ -48,7 +48,7 @@
   let mediaRecorder;
   let recordedChunks = [];
 
-  var socket = io.connect('http://' + document.domain + ':' + location.port, {
+  var socket = io.connect('https://' + document.domain + ':' + location.port, {
      reconnection: true,
      reconnectionDelay: 1000,
      reconnectionDelayMax: 5000,
@@ -101,7 +101,13 @@
     svgText.classList.add('high-opacity');
 });
   
-  function startRecording() {
+function startRecording() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error('getUserMedia is not supported in this browser.');
+        alert('Your browser does not support audio recording.');
+        return;
+    }
+
     recordedChunks = [];
     addUserDiv();
 
@@ -112,6 +118,10 @@
         mediaRecorder.addEventListener('dataavailable', function(e) {
             recordedChunks.push(e.data);
         });
+    })
+    .catch(error => {
+        console.error('Error accessing the microphone:', error);
+        alert('Could not access the microphone. Please check your settings.');
     });
   }
   function stopRecording() {

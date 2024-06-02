@@ -2,8 +2,20 @@ version: '3.8'
 
 services:
   web:
+    container_name: web
     build: .
     ports:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
+  
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d
+    ports: 
+      - 80:80
+      - 443:443
+    depends_on:
+      - web
