@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/forms"></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link href="{{ url_for('static', filename='stylesheet.css') }}" rel="stylesheet">
+<script src="../static/client.js"></script>
 </head>
 <body>
 <div class="chat-container p-4">
@@ -42,13 +43,32 @@
   </g>
 </svg>
 </div>
-
 <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 <script>
   let mediaRecorder;
   let recordedChunks = [];
 
-  var socket = io.connect('https://' + document.domain + ':' + location.port, {
+  function generateRandomUserId() {
+    const timestamp = new Date().getTime();
+    const randomString = Math.random().toString(36).substring(2, 15);
+    return `user_${randomString}_${timestamp}`;
+  }
+  localStorage.setItem("randoID", generateRandomUserId())
+  const ID = localStorage.getItem("randoID")
+
+  let httpprefix;
+  // Check if the domain is localhost
+if (window.location.hostname === 'localhost') {
+  console.log('The domain is localhost.');
+  // You can perform any specific actions for localhost here
+  httpprefix = "http://"
+} else {
+  console.log('The domain is not localhost.');
+  // You can perform any other actions for non-localhost here
+  httpprefix = "https://"
+}
+
+  var socket = io.connect(httpprefix + document.domain + ':' + location.port + `/${ID}`, {
      reconnection: true,
      reconnectionDelay: 1000,
      reconnectionDelayMax: 5000,
@@ -130,7 +150,7 @@ function startRecording() {
         const audioBlob = new Blob(recordedChunks);
         const formData = new FormData();
         formData.append('file', audioBlob);
-        fetch('/upload', {
+        fetch(`/upload/${ID}`, {
             method:'POST',
             body: formData
         })

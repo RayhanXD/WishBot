@@ -24,10 +24,11 @@ chat_history = [
 def home():
     return render_template('index3.html') #reads HTML file from templates folder
 
-@app.route('/upload', methods=['POST'])
-def upload():
+@app.route('/upload/<id>', methods=['POST'])
+def upload(id):
     audio_file = request.files['file']
     audio_file.save('audio.webm')
+    connectionID = id
 
     # Now you can use the saved audio file for further processing
     with open('audio.webm', 'rb') as f:
