@@ -43,6 +43,7 @@ def upload(id):
             data={"model": "whisper-1"}
         )
     transcript = response.json()
+    app.logger.info("Transcription Response: %s", transcript)  # Add this line for logging
 
     user_message = {
         "role": "user",
@@ -61,6 +62,7 @@ def upload(id):
     socketio.emit('user_text', {'data': transcript['text']}, to=connection_id)
 
     for chunk in chat_response:
+        app.logger.info("Chat Response Chunk: %s", chunk)  # Add this line for logging
         if chunk.choices[0].delta.content is not None:
             print(chunk.choices[0].delta.content, end="")
             socketio.emit('chatbot_text', {'data': chunk.choices[0].delta.content}, to=connection_id)
