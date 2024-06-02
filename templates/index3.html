@@ -48,14 +48,6 @@
   let mediaRecorder;
   let recordedChunks = [];
 
-  function generateRandomUserId() {
-    const timestamp = new Date().getTime();
-    const randomString = Math.random().toString(36).substring(2, 15);
-    return `user_${randomString}_${timestamp}`;
-  }
-  localStorage.setItem("randoID", generateRandomUserId())
-  const ID = localStorage.getItem("randoID")
-
   let httpprefix;
   // Check if the domain is localhost
 if (window.location.hostname === 'localhost') {
@@ -68,11 +60,14 @@ if (window.location.hostname === 'localhost') {
   httpprefix = "https://"
 }
 
-  var socket = io.connect(httpprefix + document.domain + ':' + location.port + `/${ID}`, {
+  var socket = io.connect(httpprefix + document.domain + ':' + location.port, {
      reconnection: true,
      reconnectionDelay: 1000,
      reconnectionDelayMax: 5000,
      reconnectionAttempts: Infinity
+  });
+  socket.on('connect', function() {
+    console.log('Connected to server');
   });
 
   socket.on('user_text', function(msg) {
@@ -143,14 +138,15 @@ function startRecording() {
         console.error('Error accessing the microphone:', error);
         alert('Could not access the microphone. Please check your settings.');
     });
-  }
-  function stopRecording() {
+}
+
+function stopRecording() {
     addChatbotDiv();
     mediaRecorder.addEventListener('stop', function() {
         const audioBlob = new Blob(recordedChunks);
         const formData = new FormData();
         formData.append('file', audioBlob);
-        fetch(`/upload/${ID}`, {
+        fetch(`/upload/${socket.id}`, {  // Use socket.id to send to the correct room
             method:'POST',
             body: formData
         })
@@ -159,7 +155,17 @@ function startRecording() {
         })
     });
     mediaRecorder.stop();
-  }
+}
+
+socket.on('user_text', function(msg) {
+    console.log('User text: ', msg.data);
+    // Handle user text message
+});
+
+socket.on('chatbot_text', function(msg) {
+    console.log('Chatbot text: ', msg.data);
+    // Handle chatbot text message
+});
 
   function addUserDiv() {
     const messageDiv = document.createElement('div');
