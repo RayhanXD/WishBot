@@ -1,17 +1,15 @@
-from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO, emit
-from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request
+from flask_socketio import SocketIO
 from dotenv import load_dotenv
 import requests
 from openai import OpenAI
 from groq import Groq
 import os
 
+load_dotenv()  # Add this line if it's not already present
 client = Groq(
-    api_key=os.environ.get("groq_api_key"),
+    api_key=os.getenv('GROQ_API_KEY'),
 )
-
-load_dotenv()
 api_key_open = os.getenv('OPENAI_API_KEY')
 
 app = Flask(__name__)
@@ -63,4 +61,4 @@ def upload():
     return '', 200
 
 if __name__ == '__main__':
-    socketio.run(app, port=8000)
+    socketio.run(app, port=8000, allow_unsafe_werkzeug=True)
