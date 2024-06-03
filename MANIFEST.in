@@ -1,4 +1,4 @@
 plaintext
 Include README.md
-recursive-include your_project_name/templates
-recursive-include your_project_name/static
+recursive-include WishBot/templates
+recursive-include WishBot/static
