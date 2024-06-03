@@ -14,7 +14,6 @@ services:
     container_name: nginx
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d
-      - ./WishBot/static:/usr/share/nginx/html/static  # Mount the static files directory
     ports: 
       - 80:80
       - 443:443
