@@ -13,11 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . /app/
 
-COPY static /app/static
-
-FROM nginx:latest
-COPY . /usr/share/nginx/html
-
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
