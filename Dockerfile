@@ -15,6 +15,9 @@ COPY . /app/
 
 COPY static /app/static
 
+FROM nginx:latest
+COPY . /usr/share/nginx/html
+
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 

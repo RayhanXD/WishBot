@@ -8,14 +8,16 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
-  
+
   nginx:
     image: nginx:latest
     container_name: nginx
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d
+      - ./WishBot/static:/usr/share/nginx/html/static  # Mount the static files directory
     ports: 
       - 80:80
       - 443:443
     depends_on:
       - web
+    command: /bin/bash -c "chown -R nginx:nginx /usr/share/nginx/html/static && nginx -g 'daemon off;'"  # Ensure permissions and start Nginx
