@@ -14,6 +14,7 @@ services:
     container_name: nginx
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d
+      - /var/www/WishBot/static:/app/static
     ports: 
       - 80:80
       - 443:443
