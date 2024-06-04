@@ -14,6 +14,7 @@ services:
     container_name: nginx
     volumes:
       - ./docker/nginx:/etc/nginx/conf.d
+      - ./static:/app/static  # Add this line to map the static directory
     ports: 
       - 80:80
       - 443:443
